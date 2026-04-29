@@ -74,28 +74,36 @@
         });
 
         // 4. Fetch LIVE data from the Python Flask API
-        async function loadLiveThreats() {
-            try {
-                // Call the API we just built in app.py
-                const response = await fetch('http://localhost:5000/api/threats');
-                const attacks = await response.json();
+        let trackedIPs = new Set(); 
 
-                // Loop through the database results and plot them
-                attacks.forEach(function(attack) {
-                    L.marker([attack.latitude, attack.longitude], {icon: threatIcon})
-                     .addTo(map)
-                     .bindPopup(`<b>Threat Origin:</b> ${attack.location_city}<br><b>IP:</b> ${attack.ip_address}`);
-                });
-            } catch (error) {
-                console.error("Error fetching threat data:", error);
+async function loadLiveThreats() {
+    console.log("Checking for new threats..."); // This helps you see it working in the Console
+    try {
+        const response = await fetch('http://localhost:5000/api/threats');
+        const attacks = await response.json();
+
+        attacks.forEach(function(attack) {
+            // Only add if it's a brand new IP
+            if (!trackedIPs.has(attack.ip_address)) {
+                
+                let marker = L.marker([attack.latitude, attack.longitude], {icon: threatIcon})
+                    .addTo(map)
+                    .bindPopup(`<b>LIVE ATTACK</b><br>City: ${attack.location_city}<br>IP: ${attack.ip_address}`);
+                
+                // Optional: Auto-open the popup for the very latest attack
+                marker.openPopup();
+
+                trackedIPs.add(attack.ip_address);
             }
-        }
+        });
+    } catch (error) {
+        console.log("Connection to Flask failed. Is app.py running?");
+    }
+}
 
-        // Run the function when the page loads
-        loadLiveThreats();
-        
-        // Optional: Refresh the map data every 10 seconds to watch attacks happen live!
-        setInterval(loadLiveThreats, 10000);
+// 2. THIS IS THE KEY: Run the function immediately, then every 2 seconds
+loadLiveThreats(); 
+setInterval(loadLiveThreats, 2000);
     </script>
 
 </body>
