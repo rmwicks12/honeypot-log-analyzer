@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeypot Threat Heatmap</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body {
+            background-color: #0d1117; /* Dark GitHub-style background */
+            color: #c9d1d9;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #ff4444; }
+        
+        /* The Map Container */
+        #map {
+            height: 600px;
+            width: 80%;
+            margin: 0 auto;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            box-shadow: 0px 0px 15px rgba(255, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚠️ Live Threat Heatmap ⚠️</h1>
+    <p>Monitoring unauthorized access attempts across global regions.</p>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // 1. Initialize the map and set the starting view to a global perspective
+        var map = L.map('map').setView([20.0, 0.0], 2);
+
+        // 2. Load the dark-themed map tiles (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 3. Define a custom red icon for the attackers
+        var threatIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // =========================================================
+        // DEMO DATA: These are the exact coordinates your Python
+        // script logged earlier (Russia and China).
+        // =========================================================
+        var attacks = [
+            { lat: 55.7558, lon: 37.6173, city: "Moscow", ip: "46.17.40.0" },
+            { lat: 32.0617, lon: 118.7778, city: "Nanjing", ip: "114.114.114.114" }
+        ];
+
+        // 4. Loop through the data and plot the red markers on the map
+        attacks.forEach(function(attack) {
+            L.marker([attack.lat, attack.lon], {icon: threatIcon})
+             .addTo(map)
+             .bindPopup(`<b>Threat Origin:</b> ${attack.city}<br><b>IP:</b> ${attack.ip}`);
+        });
+    </script>
+
+</body>
+</html>
