@@ -1,5 +1,6 @@
 import mysql.connector
 import time
+import random
 import requests
 
 # 1. Connect to MySQL Workbench
@@ -68,19 +69,35 @@ def handle_incoming_connection(ip_address):
     print("✅ Attack logged successfully.")
 
 # 5. Simulate the attacks
+# (Keep all your existing database connection and handle_incoming_connection logic above this line)
+
 if __name__ == "__main__":
-    print("Starting Honeypot Listener Simulator...\n")
+    import random # Make sure this is imported at the top of your file!
     
-    # Simulating a Russian IP address
-    handle_incoming_connection("46.17.40.0") 
+    print("🚀 Starting Live Honeypot Attack Simulator...\n")
+    print("Press CTRL+C in the terminal to stop the simulation.\n")
     
-    # Simulating a Chinese IP address
-    handle_incoming_connection("114.114.114.114")
+    # A list of real global IPs to make the heatmap look awesome
+    global_ips = [
+        "103.82.14.23",   # India
+        "46.17.40.0",     # Russia
+        "114.114.114.114",# China
+        "8.8.8.8",        # USA (Google)
+        "187.190.38.140", # Mexico
+        "177.54.148.10",  # Brazil
+        "2.17.214.0",     # France
+        "197.210.29.255", # Nigeria
+        "139.130.4.5"     # Australia
+    ]
     
-    # Bumping threat score for testing
-    cursor.execute("UPDATE attackers SET threat_score = 3 WHERE ip_address = '46.17.40.0'")
-    db.commit()
-    
-    # Simulating repeat attack to trigger Tarpit
-    print("\n[Simulating repeat attack from Russian IP...]")
-    handle_incoming_connection("46.17.40.0")
+    try:
+        # Run 15 simulated attacks in a row
+        for i in range(15): 
+            target_ip = random.choice(global_ips)
+            handle_incoming_connection(target_ip)
+            
+            # Wait 3 seconds before the next bot attacks
+            time.sleep(3) 
+            
+    except KeyboardInterrupt:
+        print("\n🛑 Simulation manually stopped.")
